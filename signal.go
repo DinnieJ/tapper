@@ -1,5 +1,7 @@
 package tapper
 
+import "github.com/gdamore/tcell/v2"
+
 type SignalType int
 
 const (
@@ -7,9 +9,12 @@ const (
 	SignalFocus
 	SignalResize
 	SignalDraw
+	SignalCallback
 )
 
 type Signal struct {
 	Sigtype SignalType
 	Data    interface{}
 }
+
+type SignalCallbackFn func(s tcell.Screen)
