@@ -10,6 +10,8 @@ const (
 	SignalResize
 	SignalDraw
 	SignalCallback
+	SignalSuspend
+	SignalContinue
 )
 
 type Signal struct {

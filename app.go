@@ -58,11 +58,11 @@ func (app *Application) _backgroundEventHandler() {
 		}
 	}
 }
-func (app *Application) _mainloopEventHandler() {
-	receivedSignal := <-app.signalChannel
+func _mainloopEventHandler(screen tcell.Screen, sigChan chan Signal) {
+	receivedSignal := <-sigChan
 	switch receivedSignal.Sigtype {
 	case SignalQuit:
-		app.screen.Fini()
+		screen.Fini()
 		os.Exit(0)
 	case SignalCallback:
 		// fmt.Println(receivedSignal.Data)
@@ -74,18 +74,19 @@ func (app *Application) _mainloopEventHandler() {
 		if receivedSignal.Data.(bool) {
 			displayString = 'c'
 		}
-		app.screen.SetContent(1, 1, displayString, nil, tcell.StyleDefault.Foreground(tcell.Color101).Background(tcell.ColorBlack))
+		screen.SetContent(1, 1, displayString, nil, tcell.StyleDefault.Foreground(tcell.Color101).Background(tcell.ColorBlack))
 	case SignalDraw:
-		app.screen.Sync()
+		screen.Sync()
 	}
 }
 func (app *Application) mainLoop() {
 	box := NewBox(0, 0, 10, 10, "Hello World!")
 	box.SetFocus(true)
+	app.screen.Clear()
 	for {
-		app.screen.Clear()
+		// app.screen.Clear()
 		box.Draw(app.screen)
-		app._mainloopEventHandler()
+		_mainloopEventHandler(app.screen, app.signalChannel)
 		app.screen.Show()
 	}
 }
