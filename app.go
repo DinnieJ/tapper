@@ -15,8 +15,7 @@ type Application struct {
 }
 
 func (app *Application) Run() {
-	app.screen.Init()
-	app.screen.EnableFocus()
+
 	go app._backgroundEventHandler()
 	app.mainLoop()
 }
@@ -58,11 +57,11 @@ func (app *Application) _backgroundEventHandler() {
 		}
 	}
 }
-func _mainloopEventHandler(screen tcell.Screen, sigChan chan Signal) {
+func _mainloopEventHandler(app *Application, sigChan chan Signal) {
 	receivedSignal := <-sigChan
 	switch receivedSignal.Sigtype {
 	case SignalQuit:
-		screen.Fini()
+		app.screen.Fini()
 		os.Exit(0)
 	case SignalCallback:
 		// fmt.Println(receivedSignal.Data)
@@ -70,23 +69,29 @@ func _mainloopEventHandler(screen tcell.Screen, sigChan chan Signal) {
 		// app.screen.SetContent(0, 0, 'a', nil, tcell.StyleDefault)
 		// callback(app.screen)
 	case SignalFocus:
+		boxState := app.gState.Get("test").(*Box)
 		displayString := 'f'
+		boxState.SetFocus(false)
 		if receivedSignal.Data.(bool) {
 			displayString = 'c'
+			boxState.SetFocus(true)
 		}
-		screen.SetContent(1, 1, displayString, nil, tcell.StyleDefault.Foreground(tcell.Color101).Background(tcell.ColorBlack))
+
+		app.screen.SetContent(1, 1, displayString, nil, tcell.StyleDefault.Foreground(tcell.Color101).Background(tcell.ColorBlack))
+
 	case SignalDraw:
-		screen.Sync()
+		app.screen.Sync()
 	}
 }
 func (app *Application) mainLoop() {
-	box := NewBox(0, 0, 10, 10, "Hello World!")
+	box := NewBox("test", 0, 0, 10, 10)
+	app.gState.Set("test", box)
 	box.SetFocus(true)
 	app.screen.Clear()
 	for {
 		// app.screen.Clear()
+		_mainloopEventHandler(app, app.signalChannel)
 		box.Draw(app.screen)
-		_mainloopEventHandler(app.screen, app.signalChannel)
 		app.screen.Show()
 	}
 }
@@ -100,6 +105,8 @@ func NewApplication() *Application {
 	}
 
 	gState := initGlobalState()
+	s.Init()
+	s.EnableFocus()
 	return &Application{
 		screen: s,
 		gState: gState,
