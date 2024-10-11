@@ -1,6 +1,10 @@
 package tapper
 
+import "github.com/gdamore/tcell/v2"
+
 type Drawable interface {
-	Draw(x1 int, y1 int, x2 int, y2 int, content string)
+	Draw(screen tcell.Screen, layer int)
 	GetDimension() (int, int)
 }
+
+type CellBuffer 

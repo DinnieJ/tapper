@@ -8,8 +8,7 @@ import (
 )
 
 type Application struct {
-	screen tcell.Screen
-
+	screen        tcell.Screen
 	gState        *_globalstate
 	signalChannel chan Signal
 }
@@ -70,21 +69,22 @@ func _mainloopEventHandler(app *Application, sigChan chan Signal) {
 		// callback(app.screen)
 	case SignalFocus:
 		boxState := app.gState.Get("test").(*Box)
-		displayString := 'f'
+		// displayString := 'f'
 		boxState.SetFocus(false)
 		if receivedSignal.Data.(bool) {
-			displayString = 'c'
+			// displayString = 'c'
 			boxState.SetFocus(true)
 		}
 
-		app.screen.SetContent(1, 1, displayString, nil, tcell.StyleDefault.Foreground(tcell.Color101).Background(tcell.ColorBlack))
+		// app.screen.SetContent(1, 1, displayString, nil, tcell.StyleDefault.Foreground(tcell.Color101).Background(tcell.ColorBlack))
 
 	case SignalDraw:
 		app.screen.Sync()
 	}
 }
 func (app *Application) mainLoop() {
-	box := NewBox("test", 0, 0, 10, 10)
+	mWidth, mHeight := app.screen.Size()
+	box := NewBox("test", 0, 0, mWidth-1, mHeight-1)
 	app.gState.Set("test", box)
 	box.SetFocus(true)
 	app.screen.Clear()
